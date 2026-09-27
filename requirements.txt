@@ -1,0 +1,7 @@
+streamlit
+opencv-python
+opencv-contrib-python
+ultralytics
+numpy
+pillow
+scipy
