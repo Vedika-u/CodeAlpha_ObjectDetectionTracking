@@ -29,6 +29,7 @@ class_names = list(all_classes.values())
 selected_class_names = st.sidebar.multiselect("Select Classes to Detect", class_names, default=["person"])
 class_filters = [k for k, v in all_classes.items() if v in selected_class_names] if selected_class_names else None
 
+loop_video = st.sidebar.checkbox("Loop Video", value=True) if source_type == "Video File" else False
 run_app = st.sidebar.checkbox("Start/Stop")
 
 video_path = None
@@ -58,6 +59,9 @@ if run_app:
         ret, frame = cap.read()
         if not ret:
             if source_type == "Video File":
+                if loop_video:
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                    continue
                 st.warning("End of video stream.")
             else:
                 st.warning("Cannot read frame from webcam.")
