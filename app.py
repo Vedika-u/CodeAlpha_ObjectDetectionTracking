@@ -26,8 +26,19 @@ conf_threshold = st.sidebar.slider("Confidence Threshold", 0.1, 1.0, 0.5, 0.05)
 
 all_classes = detector.classes
 class_names = list(all_classes.values())
-selected_class_names = st.sidebar.multiselect("Select Classes to Detect", class_names, default=["person"])
-class_filters = [k for k, v in all_classes.items() if v in selected_class_names] if selected_class_names else None
+
+detect_all = st.sidebar.checkbox("Detect All Classes", value=False)
+if detect_all:
+    class_filters = None
+    st.sidebar.info("Detecting all 80 COCO classes.")
+else:
+    selected_class_names = st.sidebar.multiselect(
+        "Select Classes to Detect", 
+        class_names, 
+        default=["person"],
+        help="Select classes to detect. Check 'Detect All Classes' above to detect everything."
+    )
+    class_filters = [k for k, v in all_classes.items() if v in selected_class_names] if selected_class_names else None
 
 loop_video = st.sidebar.checkbox("Loop Video", value=True) if source_type == "Video File" else False
 run_app = st.sidebar.checkbox("Start/Stop")
@@ -67,11 +78,11 @@ if run_app:
                 st.warning("Cannot read frame from webcam.")
             break
         
-        # Convert frame from BGR (OpenCV) to RGB (Streamlit)
+        # Convert frame from BGR (OpenCV) to RGB (Streamlit display)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         
-        # Detect objects
-        detections = detector.detect(frame_rgb, conf_threshold=conf_threshold, class_filters=class_filters)
+        # Detect objects using BGR frame (native OpenCV format expected by Ultralytics YOLO)
+        detections = detector.detect(frame, conf_threshold=conf_threshold, class_filters=class_filters)
         
         # Track objects
         tracks = tracker.update(detections)
